@@ -65,13 +65,12 @@ void RayTracing::TraceFast(Point3D p, Vector3D v)
 	int number = 0;
 	for (int i = 0; i < maxSteps; ++i)
 	{
+
 		number = Intersect(intersPoint, reflectionVector);
 		if (number >= 0) {
 			normalVector = spheres[number].getNormalVector(intersPoint);
-			Reflect(reflectionVector);
+			Reflect(v);
 			color += spheres[number].phong(reflectionVector, lights, intersPoint, global_ambient);
-			
-			//Reflect(v);
 		}
 		else
 			break;

@@ -83,8 +83,6 @@ void RenderScene(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glFlush();
 
-	//ofstream ofs("log.txt", ios_base::out | ios_base::trunc);
-
 	//Rysowanie - przekatna w prawo i w dol
 	for (int y = im_size_2; y > -im_size_2; y--)
 	{
@@ -125,19 +123,8 @@ void RenderScene(void)
 			//wyznaczenie coloru piksela
 			rayTracing.TraceFast(startingPoint, startingDir);
 
-			//if (color[0] == 0.0) color[0] = backcolor[0];
-			//if (color[1] == 0.0) color[1] = backcolor[1];
-			//if (color[2] == 0.0) color[2] = backcolor[2];
-
 			if (fast)
 			{
-				/*if (color[0] != 0.0 && color[1] != 0.0 && color[2] != 0.0)
-				{
-					ofs << y_fl << ": "
-						<< color[0] << ", "
-						<< color[1] << ", "
-						<< color[2] << "\n";
-				}*/
 
 				glBegin(GL_POINTS);
 				glColor3f(color[0], color[1], color[2]);
@@ -159,7 +146,6 @@ void RenderScene(void)
 			}
 		}
 	}
-	//ofs.close();
 	cout << "\r";
 	for (int i = 0; i < lastPrintLength; ++i)
 		cout << " ";
