@@ -73,7 +73,7 @@ GLubyte pixel[1][1][3];		//skladowe koloru rysowanego piksela
 
 int     number = 10;
 
-int		maxSteps = 2;			//limit iteracji
+int		maxSteps = 5;			//limit iteracji
 
 //Funkcja wyznacza wspolrzedne punktu przeciecia promienia z obiektem
 inline float sq(float a)
@@ -126,9 +126,9 @@ void Trace(Point3D p, Vector3D v, int step)
 
 	number = Intersect(p, v);
 	if (number >= 0) {
-		spheres[number].getNormalVector(intersPoint);
+		auto normal = spheres[number].getNormalVector(intersPoint);
 		//Normal(number);
-		Reflect(v);
+		Reflect(normal);
 		auto x=spheres[number].phong(v, lights, intersPoint, global_ambient);
 		color[0] += x[0];
 		color[1] += x[1];
