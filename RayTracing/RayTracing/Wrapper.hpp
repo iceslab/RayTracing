@@ -11,8 +11,24 @@ public:
 
 	float& operator[](unsigned el);
 	Wrapper & operator =(const Wrapper & w);
-	Wrapper & operator +(const Wrapper & w);
+	Wrapper operator +(const Wrapper & w);
 	Wrapper & operator +=(const Wrapper & w);
+	Wrapper operator -(const Wrapper & w);
+	Wrapper & operator -=(const Wrapper & w);
+	Wrapper operator *(const Wrapper & w);
+	Wrapper & operator *=(const Wrapper & w);
+	Wrapper operator /(const Wrapper & w);
+	Wrapper & operator /=(const Wrapper & w);
+
+	Wrapper & operator =(float w);
+	Wrapper operator +(float w);
+	Wrapper & operator +=(float w);
+	Wrapper operator -(float w);
+	Wrapper & operator -=(float w);
+	Wrapper operator *(float w);
+	Wrapper & operator *=(float w);
+	Wrapper operator /(float w);
+	Wrapper & operator /=(float w);
 private:
 	float content[3];
 };

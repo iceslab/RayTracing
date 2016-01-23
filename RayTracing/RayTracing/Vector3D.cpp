@@ -7,18 +7,11 @@ float Vector3D::scalarMul(Vector3D v)
 
 void Vector3D::normalize()
 {
-	float d = 0.0;
-	int i;
-
-	for (i = 0; i < 3; i++)
-		d += (*this)[i] * (*this)[i];
-
-	d = sqrt(d);
+	auto d = sqrt(scalarMul(*this));
 
 	if (d > 0.0)
 	{
-		for (i = 0; i < 3; i++)
-			(*this)[i] /= d;
+		(*this) /= d;
 	}
 }
 

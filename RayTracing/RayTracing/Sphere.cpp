@@ -70,6 +70,7 @@ Vector3D Sphere::getNormalVector( Point3D p )
 	result[0] = p[0] - position[0];
 	result[1] = p[1] - position[1];
 	result[2] = p[2] - position[2];
+	result.normalize();
 	return result;
 }
 ColorRGB Sphere::phong( Vector3D viewerVec, vector<Light>& lights, Point3D intersPoint, ColorRGB global_ambient )

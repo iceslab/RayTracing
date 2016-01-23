@@ -60,12 +60,8 @@ void RayTracing::Trace(Point3D p, Vector3D v, int step)
 
 void RayTracing::TraceFast(Point3D p, Vector3D v)
 {
-	intersPoint[0] = p[0];
-	intersPoint[1] = p[1];
-	intersPoint[2] = p[2];
-	reflectionVector[0] = v[0];
-	reflectionVector[1] = v[1];
-	reflectionVector[2] = v[2];
+	intersPoint = p;
+	reflectionVector = v;
 	int number = 0;
 	for (int i = 0; i < maxSteps; ++i)
 	{
@@ -73,13 +69,12 @@ void RayTracing::TraceFast(Point3D p, Vector3D v)
 		if (number >= 0) {
 			normalVector = spheres[number].getNormalVector(intersPoint);
 			Reflect(reflectionVector);
-			//Reflect(v);
 			color += spheres[number].phong(reflectionVector, lights, intersPoint, global_ambient);
 			
+			//Reflect(v);
 		}
 		else
 			break;
-
 	}
 }
 
