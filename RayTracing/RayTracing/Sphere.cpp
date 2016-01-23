@@ -123,4 +123,5 @@ ColorRGB Sphere::phong( Vector3D viewerVec, vector<Light>& lights, Point3D inter
 		resultColor[1] += ambient[1] * global_ambient[1];
 		resultColor[2] += ambient[2] * global_ambient[2];
 	}
+	return resultColor;
 }
