@@ -1,5 +1,4 @@
 #include "Light.hpp"
-Light::Light(){};
 
 istream& operator>>(istream& in, Light& s)
 {

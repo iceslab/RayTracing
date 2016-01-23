@@ -1,6 +1,8 @@
 
 #include "Sphere.hpp"
 #include "Light.hpp"
+#include "Vector3D.hpp"
+#include "ColorRGB.hpp"
 #include <fstream>
 #include <string>
 #include <vector>
@@ -37,7 +39,7 @@ int Intersect(Point3D p, Point3D v);
 void Trace(Point3D p, Point3D v, int step);
 
 //Funkcja obliczajaca oswietlenie punktu na powierzchni sfery wedlug modelu Phonga
-void Phong(int nr, float *viewerVec);
+void Phong(int nr, Point3D viewerVec);
 
 //Funkcja obliczajaca iloczyn skalarny dwoch wektorow
 float Scalar(Point3D p1, Point3D p2);
@@ -76,7 +78,7 @@ Point3D   reflectionVector;
 //Zmienne pomocnicze
 Point3D	intersPoint;		//wspolrzedne (x,y,z) punktu przeciecia promienia i sfery
 Point3D intersColor;		//skladowe coloru dla oswietlonego punktu na powierzchni sfery
-Color3	color;
+ColorRGB	color;
 Point3D backcolor;			//kolor tla wczytywany z pliku
 GLubyte pixel[1][1][3];		//skladowe koloru rysowanego piksela
 
@@ -200,7 +202,7 @@ void Phong(int nr, Point3D viewerVec)
 }
 
 //Funkcja przeprowadza normalizacje wektora.
-void Normalization(Float3 normalVec)
+void Normalization(Vector3D normalVec)
 {
 	float d = 0.0;
 	int i;
@@ -218,7 +220,7 @@ void Normalization(Float3 normalVec)
 }
 
 //Funkcja oblicza iloczyn skalarny wektorow.
-float Scalar(Point3D p1, Point3D p2)
+float Scalar(Vector3D p1, Point3D p2)
 {
 	float res = p1[0] * p2[0] + p1[1] * p2[1] + p1[2] * p2[2];
 	return res;
@@ -227,7 +229,7 @@ float Scalar(Point3D p1, Point3D p2)
 //Funkcja oblicza kierunek odbicia promienia w punkcie
 void Reflect(Point3D v) {
 	float	n_dot_i;
-	float   invert[3] = { -v[0], -v[1], -v[2] };
+	Vector3D   invert = { -v[0], -v[1], -v[2] };
 
 	Normalization(invert);
 
@@ -318,8 +320,6 @@ void RenderScene(void)
 			//if (color[1] == 0.0) color[1] = backcolor[1];
 			//if (color[2] == 0.0) color[2] = backcolor[2];
 
-			Trace2(startingPoint, startingDir, 1, color);
-
 			if (fast)
 			{
 				if (color[0] != 0.0 && color[1] != 0.0 && color[2] != 0.0)
@@ -331,7 +331,7 @@ void RenderScene(void)
 				}
 
 				glBegin(GL_POINTS);
-				glColor3fv(color);
+				glColor3f(color[0], color[1], color[2]);
 				glVertex2f(x_fl, y_fl);
 				glEnd();
 			}
