@@ -37,7 +37,6 @@ void Sphere::rotateX(double angle)
 Point3D Sphere::getIntersectionPoint(Point3D p, Vector3D v)
 {
 	float r, a, b, c, d;
-	float distance = numeric_limits<float>::max();
 	a = sq(v[0]) + sq(v[1]) + sq(v[2]);
 	b = 2 * (v[0] * (p[0] - position[0])
 		+ v[1] * (p[1] - position[1])
@@ -55,12 +54,9 @@ Point3D Sphere::getIntersectionPoint(Point3D p, Vector3D v)
 	if (d >= 0)
 	{
 		r = (-b - sqrt(d)) / (2 * a);
-		if (r > 0 && r < distance)
-		{
-			result[0] = p[0] + r*v[0];
-			result[1] = p[1] + r*v[1];
-			result[2] = p[2] + r*v[2];
-		}
+		result[0] = p[0] + r*v[0];
+		result[1] = p[1] + r*v[1];
+		result[2] = p[2] + r*v[2];
 	}
 	return result;
 }

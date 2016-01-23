@@ -1,12 +1,14 @@
 #pragma once
 #include <vector>
+#include "Solid.hpp"
 #include "Sphere.hpp"
+#include "Light.hpp"
 class RayTracing
 {
 private:
-	vector<Sphere>& spheres;
-	vector<Light>& lights;
-	ColorRGB& color;
+	vector<Solid*> solids;
+	vector<Light> lights;
+	ColorRGB color;
 
 	int maxSteps;
 	Point3D intersPoint;
@@ -15,17 +17,21 @@ private:
 
 	//Funkcja oblicza kierunek odbicia promienia w punkcie
 	void Reflect(Vector3D v);
-	int Intersect(Point3D p, Vector3D v);
+	Solid* Intersect(Point3D p, Vector3D v);
 	float sq(float a)
 	{
 		return a*a;
 	}
 public:
-	RayTracing(decltype(spheres) spheres, decltype(lights) lights, decltype(color) color, int maxSteps);
-	~RayTracing() = default;
+	RayTracing( int maxSteps );
+	~RayTracing();
+
+	void addSolid(Solid* object);
+	void addLight(Light light);
+	void print();
+	ColorRGB getColor();
 
 	//Funkcja oblicza kolor piksela dla promienia zaczynajacego sie w punkcie p i biegnacego w kierunku wskazywanym przez wektor v
-	void Trace(Point3D p, Vector3D v, int step);
 	void TraceFast(Point3D p, Vector3D v);
 };
 

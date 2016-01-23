@@ -1,76 +1,69 @@
 #include "RayTracing.hpp"
 
-RayTracing::RayTracing(decltype(spheres) spheres, decltype(lights) lights, decltype(color) color, int maxSteps)
-	: spheres(spheres), lights(lights), color(color), maxSteps(maxSteps)
-{}
+RayTracing::RayTracing(int maxSteps)
+	: maxSteps(maxSteps)
+{
 
-int RayTracing::Intersect(Point3D p, Vector3D v) {
-	float r, a, b, c, d;
-	float distance = 1000000000000;
-	int status = -1;
-	for (unsigned i = 0; i < spheres.size(); i++) {
-		a = sq(v[0]) + sq(v[1]) + sq(v[2]);
-		b = 2 * (v[0] * (p[0] - spheres[i].position[0])
-			+ v[1] * (p[1] - spheres[i].position[1])
-			+ v[2] * (p[2] - spheres[i].position[2]));
-		c = sq(p[0]) + sq(p[1]) + sq(p[2])
-			- 2 * (spheres[i].position[0] * p[0]
-			+ spheres[i].position[1] * p[1]
-			+ spheres[i].position[2] * p[2])
-			+ sq(spheres[i].position[0])
-			+ sq(spheres[i].position[1])
-			+ sq(spheres[i].position[2])
-			- sq(spheres[i].radius);
-		d = b*b - 4 * a*c;
-		if (d >= 0)
-		{
-			r = (-b - sqrt(d)) / (2 * a);
-			if (r > 0 && r < distance)
-			{
-				intersPoint[0] = p[0] + r*v[0];
-				intersPoint[1] = p[1] + r*v[1];
-				intersPoint[2] = p[2] + r*v[2];
-				distance = sqrt(sq(intersPoint[0] - p[0]) +
-					sq(intersPoint[1] - p[1]) +
-					sq(intersPoint[2] - p[2])
+}
+
+void RayTracing::addSolid(Solid * object)
+{
+	solids.push_back(object);
+}
+void RayTracing::addLight(Light light)
+{
+	lights.push_back(light);
+}
+ColorRGB RayTracing::getColor()
+{
+	return color;
+}
+
+Solid* RayTracing::Intersect(Point3D p, Vector3D v) 
+{
+	float min_distance = numeric_limits<float>::max(), distance = 0;
+	Solid* result = nullptr;
+	Point3D temp_point;
+	for(auto& s : solids)
+	{
+		temp_point = s->getIntersectionPoint(p, v);
+		distance = sqrt(sq(temp_point[0] - p[0]) +
+					sq(temp_point[1] - p[1]) +
+					sq(temp_point[2] - p[2])
 					);
-				status = i;
-			}
-		}
+		if(min_distance > distance)
+			result = s;
 	}
-	return status;
+	return result;
+}
+
+void RayTracing::print()
+{
+	for(auto& s : solids)
+	{
+		cout << "Object: "<<*dynamic_cast<Sphere*>(s) << endl;
+	}
+	for(auto& l : lights)
+	{
+		cout << "Source: "<< l << endl;
+	}
 }
 
 //Funkcja oblicza kolor piksela dla promienia zaczynajacego sie w punkcie p i biegnacego w kierunku wskazywanym przez wektor v
-void RayTracing::Trace(Point3D p, Vector3D v, int step)
-{
-	if (step > maxSteps)
-		return;
-
-	auto number = Intersect(p, v);
-	if (number >= 0) {
-		normalVector = spheres[number].getNormalVector(intersPoint);
-		Reflect(v);
-		color += spheres[number].phong(v, lights, intersPoint, global_ambient);
-		Trace(intersPoint, reflectionVector, step + 1);
-	}
-	else
-		return;
-}
 
 void RayTracing::TraceFast(Point3D p, Vector3D v)
 {
 	intersPoint = p;
 	reflectionVector = v;
-	int number = 0;
+	Solid* solid = nullptr;
 	for (int i = 0; i < maxSteps; ++i)
 	{
-
-		number = Intersect(intersPoint, reflectionVector);
-		if (number >= 0) {
-			normalVector = spheres[number].getNormalVector(intersPoint);
+		solid = Intersect(intersPoint, reflectionVector);
+		if (solid) 
+		{
+			normalVector = solid->getNormalVector(intersPoint);
 			Reflect(v);
-			color += spheres[number].phong(reflectionVector, lights, intersPoint, global_ambient);
+			color += solid->phong(v, lights, intersPoint, global_ambient);
 		}
 		else
 			break;
@@ -90,4 +83,10 @@ void RayTracing::Reflect(Vector3D v) {
 	reflectionVector[2] = 2 * (n_dot_i)*normalVector[2] - invert[2];
 
 	reflectionVector.normalize();
+}
+
+RayTracing::~RayTracing()
+{
+	for(auto& p : solids)
+		delete p;
 }
