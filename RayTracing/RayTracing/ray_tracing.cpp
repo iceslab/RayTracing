@@ -58,7 +58,7 @@ ColorRGB   global_ambient;
 
 //Parametry sledzonego promienia
 Point3D   startingPoint;						//punkt, z ktorego wychodzi promien
-Point3D   startingDir = { 0.0, 0.0, -1.0 };	//wektor opisujacy kierunek promienia
+Vector3D   startingDir = { 0.0, 0.0, -1.0 };	//wektor opisujacy kierunek promienia
 
 //Wektor normalny do powierzchni
 Vector3D   normalVector;
@@ -126,12 +126,13 @@ void Trace(Point3D p, Vector3D v, int step)
 
 	number = Intersect(p, v);
 	if (number >= 0) {
-		Normal(number);
+		spheres[number].getNormalVector(intersPoint);
+		//Normal(number);
 		Reflect(v);
-		spheres[number].phong(v, lights, intersPoint, global_ambient);
-		color[0] += intersColor[0];
-		color[1] += intersColor[1];
-		color[2] += intersColor[2];
+		auto x=spheres[number].phong(v, lights, intersPoint, global_ambient);
+		color[0] += x[0];
+		color[1] += x[1];
+		color[2] += x[2];
 		Trace(intersPoint, reflectionVector, step + 1);
 	}
 	else
@@ -150,7 +151,8 @@ void Reflect(Vector3D v) {
 	reflectionVector[1] = 2 * (n_dot_i)*normalVector[1] - invert[1];
 	reflectionVector[2] = 2 * (n_dot_i)*normalVector[2] - invert[2];
 
-	Normalization(reflectionVector);
+	reflectionVector.normalize();
+	//Normalization(reflectionVector);
 }
 
 //Funkcja inicjalizujaca definiujaca sposob rzutowania
@@ -216,7 +218,7 @@ void RenderScene(void)
 				cout << "";
 
 			//wyznaczenie coloru piksela
-			//Trace(startingPoint, startingDir, 1);
+			Trace(startingPoint, startingDir, 1);
 
 			//if (color[0] == 0.0) color[0] = backcolor[0];
 			//if (color[1] == 0.0) color[1] = backcolor[1];
