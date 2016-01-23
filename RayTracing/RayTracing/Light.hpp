@@ -1,3 +1,6 @@
+#ifndef _LIGHT_HPP_
+#define _LIGHT_HPP_
+
 #include "Point3D.hpp"
 #include "ColorRGB.hpp"
 #include <iostream>
@@ -20,3 +23,5 @@ public:
 	friend ostream& operator<<(ostream& out, Light& s);
 
 };
+
+#endif

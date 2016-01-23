@@ -26,7 +26,7 @@ public:
 
 	Point3D getIntersectionPoint(Point3D p, Vector3D v);
 	Vector3D getNormalVector( Point3D p );
-	ColorRGB phong();
+	ColorRGB phong( Vector3D viewerVec, vector<Light>& lights, Point3D intersPoint, ColorRGB global_ambient );
 
 
 	friend istream& operator>>(istream& in, Sphere& s);

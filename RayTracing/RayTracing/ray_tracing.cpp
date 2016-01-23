@@ -1,6 +1,7 @@
 
 #include "Sphere.hpp"
 #include "Light.hpp"
+#include "Point3D.hpp"
 #include "Vector3D.hpp"
 #include "ColorRGB.hpp"
 #include <fstream>

@@ -6,10 +6,12 @@
 #include <GL/glut.h>
 #include <GL/gl.h>
 #include <limits>
+#include <vector>
 
 #include "Point3D.hpp"
 #include "Vector3D.hpp"
 #include "ColorRGB.hpp"
+#include "Light.hpp"
 
 using namespace std;
 
@@ -29,7 +31,7 @@ public:
 
 	virtual Point3D getIntersectionPoint(Point3D p, Vector3D v) = 0;
 	virtual Vector3D getNormalVector( Point3D p ) = 0;
-	virtual ColorRGB phong() = 0;
+	virtual ColorRGB phong( Vector3D viewerVec, vector<Light>& lights, Point3D intersPoint, ColorRGB global_ambient ) = 0;
 
 	static void normalizeVector( Vector3D& v );
 	static inline float sq( float a ) { return a*a; }
