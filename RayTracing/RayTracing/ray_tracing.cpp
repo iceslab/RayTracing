@@ -58,7 +58,7 @@ GLubyte pixel[1][1][3];		//skladowe koloru rysowanego piksela
 int     number = 10;
 int		maxSteps = 5;			//limit iteracji
 
-RayTracing rayTracing(spheres, lights, color, maxSteps);
+RayTracing rayTracing(maxSteps);
 
 //Funkcja inicjalizujaca definiujaca sposob rzutowania
 void Myinit(void)
@@ -88,20 +88,22 @@ void RenderScene(void)
 	{
 		for (int x = -im_size_2; x < im_size_2; x++, all++)
 		{
-			auto now = clock();
-			if ((now - time) / ((double)CLOCKS_PER_SEC) > 0.5)
-			{
-				stringstream ss;
-				ss << (all / (double)iterations) * 100.0 << "%";
-				cout << "\r";
-				for (int i = 0; i < lastPrintLength; ++i)
-					cout << " ";
-				auto s = ss.str();
-				lastPrintLength = s.length();
-				cout << "\r" << s;
-				glFlush();
-				time = now;
-			}
+			// auto now = clock();
+			// if ((now - time) / ((double)CLOCKS_PER_SEC) > 0.5)
+			// {
+			// 	stringstream ss;
+			// 	ss << (all / (double)iterations) * 100.0 << "%";
+			// 	cout << "\r";
+			// 	for (int i = 0; i < lastPrintLength; ++i)
+			// 		cout << " ";
+			// 	auto s = ss.str();
+			// 	lastPrintLength = s.length();
+			// 	cout << "\r" << s;
+			// 	glFlush();
+			// 	time = now;
+			// }
+
+			// cout << "( "<<x << ", "<<y<<")\n";
 
 			x_fl = (float)x / (im_size / windowObserverDim);
 			y_fl = (float)y / (im_size / windowObserverDim);
@@ -117,12 +119,13 @@ void RenderScene(void)
 			color[1] = 0.0;
 			color[2] = 0.0;
 
-			if (x_fl > 0.0 && y_fl < 5.0)
-				cout << "";
+			// if (x_fl > 0.0 && y_fl < 5.0)
+			// 	cout << "";
 
 			//wyznaczenie coloru piksela
 			rayTracing.TraceFast(startingPoint, startingDir);
-
+			color = rayTracing.getColor();
+			// cout << "Hmm\n";
 			if (fast)
 			{
 
@@ -145,11 +148,9 @@ void RenderScene(void)
 				//Narysowanie kolejnego piksela na ekranie
 			}
 		}
+		cout <<"Line done\n" << y << endl;
 	}
-	cout << "\r";
-	for (int i = 0; i < lastPrintLength; ++i)
-		cout << " ";
-	cout << "\r";
+	cout << "Render done.";
 	glFlush();
 }
 
@@ -173,25 +174,20 @@ void ReadSceneFromFile(string fileName)
 		{
 		case DIM:
 			file >> im_size;
-			cout << im_size;
 			break;
 		case BG:
 			file >> flow(backcolor, >> );
-			cout << flow(backcolor, << ", " << );
 			break;
 		case GLOB:
 			file >> flow(global_ambient, >> );
-			cout << flow(global_ambient, << ", " << );
 			break;
 		case SPHERE:
 			file >> custom_sphere;
-			cout << custom_sphere;
-			spheres.push_back(custom_sphere);
+			rayTracing.addSolid(new Sphere( custom_sphere ));
 			break;
 		case SOURCE:
 			file >> source;
-			cout << source;
-			lights.push_back(source);
+			rayTracing.addLight(source);
 			break;
 		case UNDEFINED:
 			break;
@@ -209,6 +205,7 @@ int main(int argc, char* argv[])
 	glutCreateWindow("RayTracing");
 	Myinit();
 	glutDisplayFunc(RenderScene);
+	rayTracing.print();
 	glutMainLoop();
 
 	return 0;
