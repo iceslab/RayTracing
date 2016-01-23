@@ -37,22 +37,10 @@ using namespace std;
 int Intersect(Point3D p, Point3D v);
 
 //Funkcja oblicza kolor piksela dla promienia zaczynajacego sie w punkcie p i biegnacego w kierunku wskazywanym przez wektor v
-void Trace(Point3D p, Point3D v, int step);
-
-//Funkcja obliczajaca oswietlenie punktu na powierzchni sfery wedlug modelu Phonga
-void Phong(int nr, Point3D viewerVec);
-
-//Funkcja obliczajaca iloczyn skalarny dwoch wektorow
-float Scalar(Point3D p1, Point3D p2);
-
-//Funkcja normalizujaca wektor
-void Normalization(Point3D p);
-
-//Funkcja oblicza wektor normalny w punkcie
-void Normal(int nr);
+void Trace(Point3D p, Vector3D v, int step);
 
 //Funkcja oblicza kierunek odbicia promienia w punkcie
-void Reflect(Point3D v);
+void Reflect(Vector3D v);
 
 //Funkcja pobiera informacje z pliku
 void ReadSceneFromFile(string fileName);
@@ -66,15 +54,15 @@ vector<Sphere> spheres;
 vector<Light> lights;
 
 //Parametry swiatla rozproszonego
-Point3D   global_ambient;
+ColorRGB   global_ambient;
 
 //Parametry sledzonego promienia
 Point3D   startingPoint;						//punkt, z ktorego wychodzi promien
 Point3D   startingDir = { 0.0, 0.0, -1.0 };	//wektor opisujacy kierunek promienia
 
 //Wektor normalny do powierzchni
-Point3D   normalVector;
-Point3D   reflectionVector;
+Vector3D   normalVector;
+Vector3D   reflectionVector;
 
 //Zmienne pomocnicze
 Point3D	intersPoint;		//wspolrzedne (x,y,z) punktu przeciecia promienia i sfery
@@ -93,7 +81,7 @@ inline float sq(float a)
 	return a*a;
 }
 
-int Intersect(Point3D p, Point3D v) {
+int Intersect(Point3D p, Vector3D v) {
 	float r, a, b, c, d;
 	float distance = 1000000000000;
 	int status = -1;
@@ -131,7 +119,7 @@ int Intersect(Point3D p, Point3D v) {
 }
 
 //Funkcja oblicza kolor piksela dla promienia zaczynajacego sie w punkcie p i biegnacego w kierunku wskazywanym przez wektor v
-void Trace(Point3D p, Point3D v, int step)
+void Trace(Point3D p, Vector3D v, int step)
 {
 	if (step > maxSteps)
 		return;
@@ -140,7 +128,7 @@ void Trace(Point3D p, Point3D v, int step)
 	if (number >= 0) {
 		Normal(number);
 		Reflect(v);
-		Phong(number, v);
+		spheres[number].phong(v, lights, intersPoint, global_ambient);
 		color[0] += intersColor[0];
 		color[1] += intersColor[1];
 		color[2] += intersColor[2];
@@ -150,106 +138,19 @@ void Trace(Point3D p, Point3D v, int step)
 		return;
 }
 
-//Funkcja oblicza oswietlenie punktu na powierzchni sfery uzywajac modelu Phonga.
-void Phong(int nr, Point3D viewerVec)
-{
-	Point3D reflectionVec;           //wektor kierunku odbicia swiatla
-	Point3D lightVec;                //wektor wskazujacy zrodel
-	float n_dot_l, v_dot_r;			//zmienne pomocnicze
-
-	Point3D viewer = { -viewerVec[0], -viewerVec[1], -viewerVec[2] };
-
-	intersColor[0] = 0;
-	intersColor[1] = 0;
-	intersColor[2] = 0;
-
-	for (unsigned i = 0; i < lights.size(); i++) {
-		lightVec[0] = lights[i].position[0] - intersPoint[0]; //wektor wskazujacy kierunek zrodla
-		lightVec[1] = lights[i].position[1] - intersPoint[1];
-		lightVec[2] = lights[i].position[2] - intersPoint[2];
-
-		Normalization(lightVec);    //normalizacja wektora kierunku swiecenia zrodla           
-
-		n_dot_l = Scalar(lightVec, normalVector);
-
-		reflectionVec[0] = 2 * (n_dot_l)*normalVector[0] - lightVec[0];
-		reflectionVec[1] = 2 * (n_dot_l)*normalVector[1] - lightVec[1];
-		reflectionVec[2] = 2 * (n_dot_l)*normalVector[2] - lightVec[2];
-
-		//obliczenie wektora opisujacego kierunek swiatla odbitego od punktu na powierzchni sfery
-
-		Normalization(reflectionVec); //normalizacja wektora kierunku swiatla odbitego
-
-		v_dot_r = Scalar(reflectionVec, viewer);
-
-		if (v_dot_r < 0)                  //obserwator nie widzi oswietlanego punktu
-			v_dot_r = 0;
-
-		//sprawdzenie czy punkt na powierzchni sfery jest oswietlany przez zrodlo
-
-		if (n_dot_l > 0)    //punkt jest oswietlany,
-		{                   //oswietlenie wyliczane jest ze wzorow dla modelu Phonga
-			float x = sqrt((lights[i].position[0] - intersPoint[0])*(lights[i].position[0] - intersPoint[0]) + (lights[i].position[1] - intersPoint[1])*(lights[i].position[1] - intersPoint[1]) + (lights[i].position[2] - intersPoint[2])*(lights[i].position[2] - intersPoint[2]));
-			intersColor[0] += (1.0 / (1.0 + 0.01*x + 0.001*x*x))*(spheres[nr].diffuse[0] * lights[i].diffuse[0] * n_dot_l + spheres[nr].specular[0] * lights[i].specular[0] * pow(double(v_dot_r), (double)spheres[nr].shine)) + spheres[nr].ambient[0] * lights[i].ambient[0];
-			intersColor[1] += (1.0 / (1.0 + 0.01*x + 0.001*x*x))*(spheres[nr].diffuse[1] * lights[i].diffuse[1] * n_dot_l + spheres[nr].specular[1] * lights[i].specular[1] * pow(double(v_dot_r), (double)spheres[nr].shine)) + spheres[nr].ambient[1] * lights[i].ambient[1];
-			intersColor[2] += (1.0 / (1.0 + 0.01*x + 0.001*x*x))*(spheres[nr].diffuse[2] * lights[i].diffuse[2] * n_dot_l + spheres[nr].specular[2] * lights[i].specular[2] * pow(double(v_dot_r), (double)spheres[nr].shine)) + spheres[nr].ambient[2] * lights[i].ambient[2];
-		}
-		//punkt nie jest oswietlany   
-		//uwzgledniane jest tylko swiatlo rozproszone
-		intersColor[0] += spheres[nr].ambient[0] * global_ambient[0];
-		intersColor[1] += spheres[nr].ambient[1] * global_ambient[1];
-		intersColor[2] += spheres[nr].ambient[2] * global_ambient[2];
-	}
-}
-
-//Funkcja przeprowadza normalizacje wektora.
-void Normalization(Vector3D normalVec)
-{
-	float d = 0.0;
-	int i;
-
-	for (i = 0; i < 3; i++)
-		d += sq(normalVec[i]);
-
-	d = sqrt(d);
-
-	if (d > 0.0)
-	{
-		for (i = 0; i < 3; i++)
-			normalVec[i] /= d;
-	}
-}
-
-//Funkcja oblicza iloczyn skalarny wektorow.
-float Scalar(Vector3D p1, Point3D p2)
-{
-	float res = p1[0] * p2[0] + p1[1] * p2[1] + p1[2] * p2[2];
-	return res;
-}
-
 //Funkcja oblicza kierunek odbicia promienia w punkcie
-void Reflect(Point3D v) {
+void Reflect(Vector3D v) {
 	float	n_dot_i;
 	Vector3D   invert = { -v[0], -v[1], -v[2] };
 
-	Normalization(invert);
+	invert.normalize();
 
-	n_dot_i = Scalar(invert, normalVector);
+	n_dot_i = Vector3D::scalarMul(invert, normalVector);
 	reflectionVector[0] = 2 * (n_dot_i)*normalVector[0] - invert[0];
 	reflectionVector[1] = 2 * (n_dot_i)*normalVector[1] - invert[1];
 	reflectionVector[2] = 2 * (n_dot_i)*normalVector[2] - invert[2];
 
 	Normalization(reflectionVector);
-}
-
-//Funkcja oblicza wektor normalny w punkcie
-void Normal(int n)
-{
-	normalVector[0] = intersPoint[0] - spheres[n].position[0];
-	normalVector[1] = intersPoint[1] - spheres[n].position[1];
-	normalVector[2] = intersPoint[2] - spheres[n].position[2];
-
-	Normalization(normalVector);
 }
 
 //Funkcja inicjalizujaca definiujaca sposob rzutowania
