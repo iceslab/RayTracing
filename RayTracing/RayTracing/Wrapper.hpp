@@ -10,6 +10,9 @@ public:
 	Wrapper(initializer_list<double> il);
 
 	float& operator[](unsigned el);
+	Wrapper & operator =(const Wrapper & w);
+	Wrapper & operator +(const Wrapper & w);
+	Wrapper & operator +=(const Wrapper & w);
 private:
 	float content[3];
 };

@@ -1,9 +1,5 @@
 
-#include "Sphere.hpp"
-#include "Light.hpp"
-#include "Point3D.hpp"
-#include "Vector3D.hpp"
-#include "ColorRGB.hpp"
+#include "RayTracing.hpp"
 #include <fstream>
 #include <string>
 #include <vector>
@@ -33,18 +29,8 @@ SceneTypes str2scene_types(string s)
 
 using namespace std;
 
-//Funkcja wyznacza wspolrzedne punktu przeciecia promienia z obiektem
-int Intersect(Point3D p, Point3D v);
-
-//Funkcja oblicza kolor piksela dla promienia zaczynajacego sie w punkcie p i biegnacego w kierunku wskazywanym przez wektor v
-void Trace(Point3D p, Vector3D v, int step);
-
-//Funkcja oblicza kierunek odbicia promienia w punkcie
-void Reflect(Vector3D v);
-
 //Funkcja pobiera informacje z pliku
 void ReadSceneFromFile(string fileName);
-
 
 int     im_size = 400;
 bool	fast = true;
@@ -65,95 +51,14 @@ Vector3D   normalVector;
 Vector3D   reflectionVector;
 
 //Zmienne pomocnicze
-Point3D	intersPoint;		//wspolrzedne (x,y,z) punktu przeciecia promienia i sfery
-Point3D intersColor;		//skladowe coloru dla oswietlonego punktu na powierzchni sfery
 ColorRGB	color;
 Point3D backcolor;			//kolor tla wczytywany z pliku
 GLubyte pixel[1][1][3];		//skladowe koloru rysowanego piksela
 
 int     number = 10;
-
 int		maxSteps = 5;			//limit iteracji
 
-//Funkcja wyznacza wspolrzedne punktu przeciecia promienia z obiektem
-inline float sq(float a)
-{
-	return a*a;
-}
-
-int Intersect(Point3D p, Vector3D v) {
-	float r, a, b, c, d;
-	float distance = 1000000000000;
-	int status = -1;
-	for (unsigned i = 0; i < spheres.size(); i++) {
-		a = sq(v[0]) + sq(v[1]) + sq(v[2]);
-		b = 2 * (v[0] * (p[0] - spheres[i].position[0])
-			+ v[1] * (p[1] - spheres[i].position[1])
-			+ v[2] * (p[2] - spheres[i].position[2]));
-		c = sq(p[0]) + sq(p[1]) + sq(p[2])
-			- 2 * (spheres[i].position[0] * p[0]
-			+ spheres[i].position[1] * p[1]
-			+ spheres[i].position[2] * p[2])
-			+ sq(spheres[i].position[0])
-			+ sq(spheres[i].position[1])
-			+ sq(spheres[i].position[2])
-			- sq(spheres[i].radius);
-		d = b*b - 4 * a*c;
-		if (d >= 0)
-		{
-			r = (-b - sqrt(d)) / (2 * a);
-			if (r > 0 && r < distance)
-			{
-				intersPoint[0] = p[0] + r*v[0];
-				intersPoint[1] = p[1] + r*v[1];
-				intersPoint[2] = p[2] + r*v[2];
-				distance = sqrt(sq(intersPoint[0] - p[0]) +
-					sq(intersPoint[1] - p[1]) +
-					sq(intersPoint[2] - p[2])
-					);
-				status = i;
-			}
-		}
-	}
-	return status;
-}
-
-//Funkcja oblicza kolor piksela dla promienia zaczynajacego sie w punkcie p i biegnacego w kierunku wskazywanym przez wektor v
-void Trace(Point3D p, Vector3D v, int step)
-{
-	if (step > maxSteps)
-		return;
-
-	number = Intersect(p, v);
-	if (number >= 0) {
-		auto normal = spheres[number].getNormalVector(intersPoint);
-		//Normal(number);
-		Reflect(normal);
-		auto x=spheres[number].phong(v, lights, intersPoint, global_ambient);
-		color[0] += x[0];
-		color[1] += x[1];
-		color[2] += x[2];
-		Trace(intersPoint, reflectionVector, step + 1);
-	}
-	else
-		return;
-}
-
-//Funkcja oblicza kierunek odbicia promienia w punkcie
-void Reflect(Vector3D v) {
-	float	n_dot_i;
-	Vector3D   invert = { -v[0], -v[1], -v[2] };
-
-	invert.normalize();
-
-	n_dot_i = Vector3D::scalarMul(invert, normalVector);
-	reflectionVector[0] = 2 * (n_dot_i)*normalVector[0] - invert[0];
-	reflectionVector[1] = 2 * (n_dot_i)*normalVector[1] - invert[1];
-	reflectionVector[2] = 2 * (n_dot_i)*normalVector[2] - invert[2];
-
-	reflectionVector.normalize();
-	//Normalization(reflectionVector);
-}
+RayTracing rayTracing(spheres, lights, color, maxSteps);
 
 //Funkcja inicjalizujaca definiujaca sposob rzutowania
 void Myinit(void)
@@ -178,7 +83,7 @@ void RenderScene(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glFlush();
 
-	ofstream ofs("log.txt", ios_base::out | ios_base::trunc);
+	//ofstream ofs("log.txt", ios_base::out | ios_base::trunc);
 
 	//Rysowanie - przekatna w prawo i w dol
 	for (int y = im_size_2; y > -im_size_2; y--)
@@ -218,7 +123,7 @@ void RenderScene(void)
 				cout << "";
 
 			//wyznaczenie coloru piksela
-			Trace(startingPoint, startingDir, 1);
+			rayTracing.TraceFast(startingPoint, startingDir);
 
 			//if (color[0] == 0.0) color[0] = backcolor[0];
 			//if (color[1] == 0.0) color[1] = backcolor[1];
@@ -226,13 +131,13 @@ void RenderScene(void)
 
 			if (fast)
 			{
-				if (color[0] != 0.0 && color[1] != 0.0 && color[2] != 0.0)
+				/*if (color[0] != 0.0 && color[1] != 0.0 && color[2] != 0.0)
 				{
 					ofs << y_fl << ": "
 						<< color[0] << ", "
 						<< color[1] << ", "
 						<< color[2] << "\n";
-				}
+				}*/
 
 				glBegin(GL_POINTS);
 				glColor3f(color[0], color[1], color[2]);
@@ -254,7 +159,7 @@ void RenderScene(void)
 			}
 		}
 	}
-	ofs.close();
+	//ofs.close();
 	cout << "\r";
 	for (int i = 0; i < lastPrintLength; ++i)
 		cout << " ";
