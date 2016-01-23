@@ -2,9 +2,7 @@
 #include "ColorRGB.hpp"
 #include <iostream>
 
-#ifndef flow(array, dir)
-#define flow(array, dir) array[0] dir array[1] dir array[2]
-#endif
+#include "defines.h"
 
 using namespace std;
 

@@ -1,7 +1,7 @@
 #ifndef _SPHERE_HPP_
 #define _SPHERE_HPP_
 
-#define flow(array, dir) array[0] dir array[1] dir array[2]
+#include "defines.h"
 
 #include <math.h>
 #include <iostream>

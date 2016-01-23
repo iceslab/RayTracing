@@ -1,8 +1,6 @@
 #ifndef _SOLID_HPP_
 #define _SOLID_HPP_
 
-#define flow(array, dir) array[0] dir array[1] dir array[2]
-
 #include <math.h>
 #include <iostream>
 #include <GL/glut.h>

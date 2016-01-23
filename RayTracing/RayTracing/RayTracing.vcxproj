@@ -21,8 +21,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColorRGB.hpp" />
+    <ClInclude Include="defines.h" />
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="Point3D.hpp" />
+    <ClInclude Include="Solid.hpp" />
     <ClInclude Include="Sphere.hpp" />
     <ClInclude Include="Vector3D.hpp" />
     <ClInclude Include="Wrapper.hpp" />

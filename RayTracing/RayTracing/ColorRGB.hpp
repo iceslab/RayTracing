@@ -3,7 +3,7 @@
 class ColorRGB : public Wrapper
 {
 public:
-	ColorRGB();
-	~ColorRGB();
+	ColorRGB() = default;
+	~ColorRGB() = default;
 };
 
