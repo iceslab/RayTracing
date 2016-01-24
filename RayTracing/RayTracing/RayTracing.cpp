@@ -34,6 +34,7 @@ Solid* RayTracing::Intersect(Point3D p, Vector3D v)
 					);
 			if(min_dist > dist)
 			{
+				min_dist = dist;
 				result = s;
 			}
 		}

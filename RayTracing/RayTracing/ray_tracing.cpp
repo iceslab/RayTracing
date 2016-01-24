@@ -78,8 +78,6 @@ void RenderScene(void)
 	im_size_2 = im_size / 2;    //obliczenie polowy rozmiaru obrazu w pikselach
 	const int iterations = (im_size_2 << 1) * (im_size_2 << 1);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glFlush();
-
 	//Rysowanie - przekatna w prawo i w dol
 	for (int y = im_size_2; y > -im_size_2; y--)
 	{
@@ -147,7 +145,7 @@ void RenderScene(void)
 			}
 		}
 	}
-	glFlush();
+	glutSwapBuffers();
 }
 
 void ReadSceneFromFile(string fileName)
@@ -195,18 +193,52 @@ void ReadSceneFromFile(string fileName)
 	file.close();
 }
 
+void keys(unsigned char key, int x, int y)
+{
+    switch(key)
+    {
+        case '1':rayTracing.maxSteps = 1;
+        break;
+        case '2':rayTracing.maxSteps = 2;
+        break;
+        case '3':rayTracing.maxSteps = 3;
+        break;
+        case '4':rayTracing.maxSteps = 5;
+        break;
+        case '5':rayTracing.maxSteps = 10;
+        break;
+    }
+    cout << "\r";
+    cout << rayTracing.maxSteps;
+    
+}
+
+void idle()
+{
+	rayTracing.solids[0]->rotateX(0.1);
+	rayTracing.solids[1]->rotateX(0.1);
+
+	// cout << flow(spheres[0].position, <<", " <<) << endl;
+
+	for( int i = 2; i < rayTracing.solids.size(); ++i)
+		rayTracing.solids[i]->rotateZ(-0.05);
+	RenderScene();
+}
+
 int main(int argc, char* argv[])
 {
 	glutInit(&argc, argv);
-	if (argc > 1)
-	{
-		cout << "no elo";
-		rayTracing.maxSteps = atoi(argv[1]);
-	}
+	// if (argc > 1)
+	// {
+	// 	cout << "no elo";
+	// 	rayTracing.maxSteps = atoi(argv[1]);
+	// }
 	ReadSceneFromFile("scena.txt");
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutInitWindowSize(im_size, im_size);
 	glutCreateWindow("RayTracing");
+    glutKeyboardFunc(keys);
+	glutIdleFunc(idle);
 	Myinit();
 	glutDisplayFunc(RenderScene);
 	rayTracing.print();

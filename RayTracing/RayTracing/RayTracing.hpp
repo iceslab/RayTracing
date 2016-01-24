@@ -6,7 +6,7 @@
 class RayTracing
 {
 private:
-	vector<Solid*> solids;
+	
 	vector<Light> lights;
 	
 	ColorRGB global_ambient;
@@ -21,7 +21,10 @@ private:
 public:
 	RayTracing( int maxSteps = 1 );
 	~RayTracing();
+	
 	int maxSteps;
+	vector<Solid*> solids;
+	
 	void addSolid(Solid* object);
 	void addLight(Light light);
 	void setGlobalAmbient(ColorRGB c);
