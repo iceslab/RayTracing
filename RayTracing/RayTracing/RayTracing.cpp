@@ -21,28 +21,43 @@ void RayTracing::setGlobalAmbient(ColorRGB c)
 
 Solid* RayTracing::Intersect(Point3D p, Vector3D v) 
 {
-	float min_distance = numeric_limits<float>::max(), distance = 0;
+	// float min_distance = numeric_limits<float>::max(), distance = 0;
 	Solid* result = nullptr;
 	Point3D temp_point;
-	for(Solid* s : solids)
-	{
-		// cout << "Sprawdzam: " << s <<endl;
-		temp_point = s->getIntersectionPoint(p, v);
-		if(temp_point[0] != 123.5)
+	float r, a, b, c, d;
+	float distance = 1000000000000;
+	for (unsigned i = 0; i < solids.size(); i++) {
+		a = sq(v[0]) + sq(v[1]) + sq(v[2]);
+		b = 2 * (v[0] * (p[0] - solids[i]->position[0])
+			+ v[1] * (p[1] - solids[i]->position[1])
+			+ v[2] * (p[2] - solids[i]->position[2]));
+		c = sq(p[0]) + sq(p[1]) + sq(p[2])
+			- 2 * (solids[i]->position[0] * p[0]
+			+ solids[i]->position[1] * p[1]
+			+ solids[i]->position[2] * p[2])
+			+ sq(solids[i]->position[0])
+			+ sq(solids[i]->position[1])
+			+ sq(solids[i]->position[2])
+			- sq(dynamic_cast<Sphere*>(solids[i])->radius);
+		d = b*b - 4 * a*c;
+		temp_point = solids[i]->getIntersectionPoint( p, v );
+		if(temp_point[0] != 123.5 )
+		// if (d >= 0)
 		{
-			// cout << temp_point[0];
-			distance = sqrt(sq(temp_point[0] - p[0]) +
-						sq(temp_point[1] - p[1]) +
-						sq(temp_point[2] - p[2])
-						);
-			// if(min_distance > distance)
+			r = (-b - sqrt(d)) / (2 * a);
+			if (r > 0 && r < distance)
 			{
-				// min_distance = distance;
-				result = s;
+				// temp_point[0] = p[0] + r*v[0];
+				// temp_point[1] = p[1] + r*v[1];
+				// temp_point[2] = p[2] + r*v[2];
+				temp_point = solids[i]->getIntersectionPoint( p, v );
+				distance = sqrt(sq(temp_point[0] - p[0]) +
+					sq(temp_point[1] - p[1]) +
+					sq(temp_point[2] - p[2])
+					);
+				result = solids[i];
 			}
 		}
-		// else
-			// cout << "Pozdro!\n";
 	}
 	return result;
 }
@@ -71,15 +86,17 @@ ColorRGB RayTracing::TraceFast(Point3D startPoint, Vector3D vector)
 	color[1] = 0.0;
 	color[2] = 0.0;
 	// cout << flow(vector, <<", "<<)<<endl;
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < maxSteps; ++i)
 	{
 		solid = Intersect(startPoint, vector);
 		if (solid) 
 		{
 			startPoint = solid->getIntersectionPoint(startPoint, vector);
+			
+			
+			color += solid->phong(vector, lights, startPoint, global_ambient);
 			normalVector = solid->getNormalVector( startPoint );
 			vector = Reflect(vector, normalVector);
-			color += solid->phong(vector, lights, startPoint, global_ambient);
 			// cout << "Hit\n";
 			
 			// cout << "Hit: " <<solid <<endl;

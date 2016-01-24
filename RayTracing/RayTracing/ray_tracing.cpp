@@ -55,10 +55,7 @@ Vector3D   startingDir = { 0.0, 0.0, -1.0 };	//wektor opisujacy kierunek promien
 Point3D backcolor;			//kolor tla wczytywany z pliku
 GLubyte pixel[1][1][3];		//skladowe koloru rysowanego piksela
 
-int     number = 10;
-int		maxSteps = 5;			//limit iteracji
-
-RayTracing rayTracing(maxSteps);
+RayTracing rayTracing;
 
 //Funkcja inicjalizujaca definiujaca sposob rzutowania
 void Myinit(void)
@@ -201,6 +198,11 @@ void ReadSceneFromFile(string fileName)
 int main(int argc, char* argv[])
 {
 	glutInit(&argc, argv);
+	if (argc > 1)
+	{
+		cout << "no elo";
+		rayTracing.maxSteps = atoi(argv[1]);
+	}
 	ReadSceneFromFile("scena.txt");
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
 	glutInitWindowSize(im_size, im_size);
