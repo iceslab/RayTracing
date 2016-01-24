@@ -18,6 +18,10 @@ void RayTracing::setGlobalAmbient(ColorRGB c)
 {
 	global_ambient = c;
 }
+void RayTracing::setBackgroundColor(ColorRGB c)
+{
+	background_color = c;
+}
 
 Solid* RayTracing::Intersect(Point3D p, Vector3D v) 
 {
@@ -62,9 +66,7 @@ ColorRGB RayTracing::TraceFast(Point3D startPoint, Vector3D vector)
 	Solid* solid = nullptr;
 	Vector3D normalVector;
 	ColorRGB color;
-	color[0] = 0.0;
-	color[1] = 0.0;
-	color[2] = 0.0;
+	// color = background_color;
 	// cout << flow(vector, <<", "<<)<<endl;
 	for (int i = 0; i < maxSteps; ++i)
 	{
@@ -81,8 +83,9 @@ ColorRGB RayTracing::TraceFast(Point3D startPoint, Vector3D vector)
 			
 			// cout << "Hit: " <<solid <<endl;
 		}
-		else
+		else if( !solid && !i)
 		{
+			color = background_color;
 			break;
 		}
 	}
