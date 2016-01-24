@@ -1,6 +1,6 @@
 #include "RayTracing.hpp"
 
-RayTracing::RayTracing(int maxSteps)
+RayTracing::RayTracing( int maxSteps )
 	: maxSteps(maxSteps)
 {
 
@@ -14,9 +14,9 @@ void RayTracing::addLight(Light light)
 {
 	lights.push_back(light);
 }
-ColorRGB RayTracing::getColor()
+void RayTracing::setGlobalAmbient(ColorRGB c)
 {
-	return color;
+	global_ambient = c;
 }
 
 Solid* RayTracing::Intersect(Point3D p, Vector3D v) 
@@ -24,21 +24,32 @@ Solid* RayTracing::Intersect(Point3D p, Vector3D v)
 	float min_distance = numeric_limits<float>::max(), distance = 0;
 	Solid* result = nullptr;
 	Point3D temp_point;
-	for(auto& s : solids)
+	for(Solid* s : solids)
 	{
+		// cout << "Sprawdzam: " << s <<endl;
 		temp_point = s->getIntersectionPoint(p, v);
-		distance = sqrt(sq(temp_point[0] - p[0]) +
-					sq(temp_point[1] - p[1]) +
-					sq(temp_point[2] - p[2])
-					);
-		if(min_distance > distance)
-			result = s;
+		if(temp_point[0] != 123.5)
+		{
+			// cout << temp_point[0];
+			distance = sqrt(sq(temp_point[0] - p[0]) +
+						sq(temp_point[1] - p[1]) +
+						sq(temp_point[2] - p[2])
+						);
+			// if(min_distance > distance)
+			{
+				// min_distance = distance;
+				result = s;
+			}
+		}
+		// else
+			// cout << "Pozdro!\n";
 	}
 	return result;
 }
 
 void RayTracing::print()
 {
+	cout << flow(global_ambient, <<" "<<)<<endl;
 	for(auto& s : solids)
 	{
 		cout << "Object: "<<*dynamic_cast<Sphere*>(s) << endl;
@@ -51,38 +62,52 @@ void RayTracing::print()
 
 //Funkcja oblicza kolor piksela dla promienia zaczynajacego sie w punkcie p i biegnacego w kierunku wskazywanym przez wektor v
 
-void RayTracing::TraceFast(Point3D p, Vector3D v)
+ColorRGB RayTracing::TraceFast(Point3D startPoint, Vector3D vector)
 {
-	intersPoint = p;
-	reflectionVector = v;
 	Solid* solid = nullptr;
-	for (int i = 0; i < maxSteps; ++i)
+	Vector3D normalVector;
+	ColorRGB color;
+	color[0] = 0.0;
+	color[1] = 0.0;
+	color[2] = 0.0;
+	// cout << flow(vector, <<", "<<)<<endl;
+	for (int i = 0; i < 2; ++i)
 	{
-		solid = Intersect(intersPoint, reflectionVector);
+		solid = Intersect(startPoint, vector);
 		if (solid) 
 		{
-			normalVector = solid->getNormalVector(intersPoint);
-			Reflect(v);
-			color += solid->phong(v, lights, intersPoint, global_ambient);
+			startPoint = solid->getIntersectionPoint(startPoint, vector);
+			normalVector = solid->getNormalVector( startPoint );
+			vector = Reflect(vector, normalVector);
+			color += solid->phong(vector, lights, startPoint, global_ambient);
+			// cout << "Hit\n";
+			
+			// cout << "Hit: " <<solid <<endl;
 		}
 		else
+		{
 			break;
+		}
 	}
+	// cout << flow(color, <<", "<<)<<endl;
+	return color;
 }
 
 //Funkcja oblicza kierunek odbicia promienia w punkcie
-void RayTracing::Reflect(Vector3D v) {
+Vector3D RayTracing::Reflect(Vector3D ray, Vector3D normal) {
 	float	n_dot_i;
-	Vector3D   invert = { -v[0], -v[1], -v[2] };
-
+	Vector3D   invert = { -ray[0], -ray[1], -ray[2] };
 	invert.normalize();
 
-	n_dot_i = Vector3D::scalarMul(invert, normalVector);
-	reflectionVector[0] = 2 * (n_dot_i)*normalVector[0] - invert[0];
-	reflectionVector[1] = 2 * (n_dot_i)*normalVector[1] - invert[1];
-	reflectionVector[2] = 2 * (n_dot_i)*normalVector[2] - invert[2];
+	Vector3D result;
 
-	reflectionVector.normalize();
+	n_dot_i = Vector3D::scalarMul(invert, normal);
+	result[0] = 2 * (n_dot_i)*normal[0] - invert[0];
+	result[1] = 2 * (n_dot_i)*normal[1] - invert[1];
+	result[2] = 2 * (n_dot_i)*normal[2] - invert[2];
+	result.normalize();
+
+	return result;
 }
 
 RayTracing::~RayTracing()

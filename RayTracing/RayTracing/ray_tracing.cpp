@@ -36,22 +36,22 @@ int     im_size = 400;
 bool	fast = true;
 float   windowObserverDim = 20.0;
 
-vector<Sphere> spheres;
-vector<Light> lights;
+// vector<Sphere> spheres;
+// vector<Light> lights;
 
 //Parametry swiatla rozproszonego
-ColorRGB   global_ambient;
+// ColorRGB   glob_amb;
 
 //Parametry sledzonego promienia
 Point3D   startingPoint;						//punkt, z ktorego wychodzi promien
 Vector3D   startingDir = { 0.0, 0.0, -1.0 };	//wektor opisujacy kierunek promienia
 
 //Wektor normalny do powierzchni
-Vector3D   normalVector;
-Vector3D   reflectionVector;
+// Vector3D   normalVector;
+// Vector3D   reflectionVector;
 
 //Zmienne pomocnicze
-ColorRGB	color;
+// ColorRGB	color;
 Point3D backcolor;			//kolor tla wczytywany z pliku
 GLubyte pixel[1][1][3];		//skladowe koloru rysowanego piksela
 
@@ -115,6 +115,7 @@ void RenderScene(void)
 			startingPoint[2] = windowObserverDim;
 
 			//wyznaczenie poczatku sledzonego promienia dla rysowanego piksela
+			ColorRGB color;
 			color[0] = 0.0;
 			color[1] = 0.0;
 			color[2] = 0.0;
@@ -123,8 +124,8 @@ void RenderScene(void)
 			// 	cout << "";
 
 			//wyznaczenie coloru piksela
-			rayTracing.TraceFast(startingPoint, startingDir);
-			color = rayTracing.getColor();
+			color = rayTracing.TraceFast(startingPoint, startingDir);
+			// color = rayTracing.getColor();
 			// cout << "Hmm\n";
 			if (fast)
 			{
@@ -148,9 +149,7 @@ void RenderScene(void)
 				//Narysowanie kolejnego piksela na ekranie
 			}
 		}
-		cout <<"Line done\n" << y << endl;
 	}
-	cout << "Render done.";
 	glFlush();
 }
 
@@ -167,6 +166,7 @@ void ReadSceneFromFile(string fileName)
 	}
 	Sphere custom_sphere;
 	Light source;
+	ColorRGB glob_amb;
 	while (!file.eof()) {
 		file >> buffer;
 		cout << buffer << endl;
@@ -179,7 +179,9 @@ void ReadSceneFromFile(string fileName)
 			file >> flow(backcolor, >> );
 			break;
 		case GLOB:
-			file >> flow(global_ambient, >> );
+			file >> flow(glob_amb, >> );
+			cout << flow(glob_amb, <<" "<<)<<endl;
+			rayTracing.setGlobalAmbient(glob_amb);
 			break;
 		case SPHERE:
 			file >> custom_sphere;
