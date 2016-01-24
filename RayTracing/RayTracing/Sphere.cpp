@@ -27,12 +27,13 @@ void Sphere::rotateZ(double angle)
 
 void Sphere::rotateX(double angle)
 {
-	position[2] += 5;
+	auto temp = position[2];
+	position[2] += temp;
 	double z = position[0] * cos(angle) - position[2] * sin(angle);
 	double y = position[0] * sin(angle) + position[2] * cos(angle);
 	position[0] = z;
 	position[2] = y;
-	position[2] -= 5;
+	position[2] -= temp;
 }
 Point3D Sphere::getIntersectionPoint(Point3D p, Vector3D v)
 {
