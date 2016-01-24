@@ -91,4 +91,5 @@ void RayTracing::Reflect(Vector3D v) {
 	reflectionVector[2] = 2 * (n_dot_i)*normalVector[2] - invert[2];
 
 	reflectionVector.normalize();
+
 }
