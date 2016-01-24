@@ -42,14 +42,11 @@ Point3D Sphere::getIntersectionPoint(Point3D p, Vector3D v)
 	b = 2 * (v[0] * (p[0] - position[0])
 		+ v[1] * (p[1] - position[1])
 		+ v[2] * (p[2] - position[2]));
-	c = sq(p[0]) + sq(p[1]) + sq(p[2])
-		- 2 * (position[0] * p[0]
-		+ position[1] * p[1]
-		+ position[2] * p[2])
-		+ sq(position[0])
-		+ sq(position[1])
-		+ sq(position[2])
+	c = sq(p[0] - position[0]) 
+		+ sq(p[1] - position[1]) 
+		+ sq(p[2] - position[2])
 		- sq(radius);
+
 	d = b*b - 4 * a*c;
 	Point3D result;
 	result[0] = 123.5;
