@@ -66,6 +66,7 @@ ColorRGB RayTracing::TraceFast(Point3D startPoint, Vector3D vector)
 	Solid* solid = nullptr;
 	Vector3D normalVector;
 	ColorRGB color;
+	color[0] = color[1] = color[2] = 0;
 	// color = background_color;
 	// cout << flow(vector, <<", "<<)<<endl;
 	for (int i = 0; i < maxSteps; ++i)
