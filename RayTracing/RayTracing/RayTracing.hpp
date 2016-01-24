@@ -8,7 +8,7 @@ class RayTracing
 private:
 	vector<Solid*> solids;
 	vector<Light> lights;
-	int maxSteps;
+	
 	ColorRGB global_ambient;
 
 	//Funkcja oblicza kierunek odbicia promienia w punkcie
@@ -19,9 +19,9 @@ private:
 		return a*a;
 	}
 public:
-	RayTracing( int maxSteps );
+	RayTracing( int maxSteps = 1 );
 	~RayTracing();
-
+	int maxSteps;
 	void addSolid(Solid* object);
 	void addLight(Light light);
 	void setGlobalAmbient(ColorRGB c);

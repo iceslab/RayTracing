@@ -24,6 +24,7 @@ public:
 	void rotateZ(double angle);
 	void rotateX(double angle);
 
+	bool hit(Point3D p, Vector3D v);
 	Point3D getIntersectionPoint(Point3D p, Vector3D v);
 	Vector3D getNormalVector( Point3D p );
 	ColorRGB phong( Vector3D viewerVec, vector<Light>& lights, Point3D intersPoint, ColorRGB global_ambient );

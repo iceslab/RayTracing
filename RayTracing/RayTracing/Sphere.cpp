@@ -57,9 +57,12 @@ Point3D Sphere::getIntersectionPoint(Point3D p, Vector3D v)
 	if (d >= 0)
 	{
 		r = (-b - sqrt(d)) / (2 * a);
-		result[0] = p[0] + r*v[0];
-		result[1] = p[1] + r*v[1];
-		result[2] = p[2] + r*v[2];
+		if(r > 0)
+		{
+			result[0] = p[0] + r*v[0];
+			result[1] = p[1] + r*v[1];
+			result[2] = p[2] + r*v[2];
+		}
 	}
 	return result;
 }
